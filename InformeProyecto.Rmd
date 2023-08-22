@@ -1,0 +1,519 @@
+---
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+toc: TRUE 
+lang: "es-Es"
+---
+\pagebreak 
+
+```{r setup, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE, tidy.opts=list(width.cutoff=60),tidy=TRUE)
+```
+
+## Introducción
+
+En un mundo en constante evolución financiera, los préstamos bancarios se han convertido en una herramienta esencial para que individuos y empresas alcancen sus objetivos económicos. Los préstamos no solo tienen un impacto directo en la vida financiera de las personas, sino que también juegan un papel fundamental en la economía en general. Analizar y comprender los datos relacionados con préstamos bancarios puede brindar valiosas perspectivas sobre patrones de endeudamiento, riesgos financieros y comportamientos económicos.
+
+La aprobación de un préstamo depende de una serie de factores que los bancos evalúan meticulosamente para minimizar riesgos y asegurar la viabilidad de la inversión. Según José Luis Martínez, portavoz de la Asociación Española de Banca (AEB), el éxito de la operación a largo plazo. “La prioridad de los bancos es conceder préstamos de forma responsable y transparente, con el doble objetivo final de dar el mejor servicio al cliente y también protegerlo”  
+
+El presente proyecto tiene como objetivo realizar un análisis estadístico inferencial exhaustivo sobre un conjunto de datos de préstamos bancarios. A través de la aplicación de técnicas de estadística inferencial, buscaremos no solo describir las características y tendencias presentes en los datos, sino también extraer conclusiones que permitan hacer inferencias significativas sobre la población de préstamos en cuestión.
+
+
+\pagebreak 
+
+## Objetivos
+
+### Objetivo N°1
+
+Comparar la proporción de nivel de endeudamiento alto entre prestatarios propietarios e inquilinos.
+
+### Objetivo N°2
+
+Comparar la proporción del nivel alto de puntuaciones de crédito entre aquellos prestatarios que se han declarado en quiebra y los que no.
+
+### Objetivo N°3
+
+Contrastar la proporción del monto de préstamo de nivel alto entre los prestatarios que registran un record público negativo y aquellos que no.
+
+
+# Base de Datos 
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+loans = read.csv("C:\\Users\\elsac\\Documents\\Estadistica\\Codigo proyecto\\loansdata.csv")
+colnames(loans) = c("Monto del Prestamo", "Tiempo de empleo", "Propiedad de la vivienda","Nivel de ingresos", "Propósito del préstamo", "Nivel de endeudamiento","Puntaje de crédito","Consulta reciente","Registro de morosidad", "Cuentas de crédito", "Registro público negativo", "Utilización de crédito","Pasado en bancarrota")
+kable(head(loans))
+```
+
+Las variables de esta base de datos presentan un valor significativo al evaluar el perfil de los prestatarios y al comprender los factores que pueden afectar su capacidad de reembolso de un préstamo. A continuación, se describe cada variable, junto con las categorías correspondientes que abarcan.
+
+## Descripción de las variables de la base de datos
+
+### Monto del préstamo (“loan_amount”)
+
+Esta variable cualitativa refleja distintos intervalos o categorías de montos de préstamos que los prestatarios podrían requerir. Estas categorías se dividen en tres: “Bajo” (Low), “Mediano” (Medium) y “Alto” (High), con el propósito de representar diversos niveles de financiamiento.
+
+### Tiempo de empleo (emp_length)
+
+Tiempo de empleo. Esta variable cualitativa indica diferentes categorías de duración de empleo, como "Menos de 1 año", "1-3 años", "4-6 años", etc., para capturar la antigüedad laboral de los prestatarios.
+
+###  Propiedad de vivienda (home_ownership) 
+
+Esta variable cualitativa representa la situación de vivienda de los prestatarios, como "Own", "Rent" o " Mortgage", indicando si el prestatario es propietario, inquilino o tiene una hipoteca en su vivienda.
+
+### Nivel de ingresos(income) 
+
+Esta variable cualitativa se segmenta en tres categorías: “Bajo” (Low), “Mediano” (Medium) y “Alto” (High), con el propósito de representar los distintos niveles de ingresos de los prestatarios.
+
+### Propósito del préstamo (loan_ purpose) 
+
+Esta variable cualitativa abarca diversas categorías, tales como “Salud” (Medical), “Automóvil” (Car), “Tarjetas de crédito” (Credit Card), “Mejoras para el hogar” (Home Improvement), entre otras. Estas categorías reflejan las distintas razones por las cuales el prestatario está solicitando el préstamo.
+
+### Nivel de endeudamiento(debt_to_income) 
+
+Esta variable cualitativa tiene el propósito de reflejar los distintos niveles de relación existentes entre la deuda y los ingresos. Los términos utilizados para denotar estos niveles son: “Bajo” (Low), para indicar una proporción baja, “Regular” (Average) para señalar una proporción y “Alto”  (High)para representar una proporción elevada. Estos términos capturan la medida en que los ingresos del prestatario están destinados al reembolso de deudas.
+
+### Puntaje crediticio (credit_score)
+
+Esta variable cualitativa se encuentra dividida en tres categorías: “Bajo” (Low), Regular (Average) y “Alto” (High), con el propósito de representar distintos niveles de puntuación crediticia.
+
+### Consulta reciente (recent_inquiry) 
+
+Esta variable cualitativa podría ser “Sí” (Yes) o “No” (No) para indicar si el prestatario ha tenido una consulta reciente en su historial de crédito.
+
+### Registro de morosidad (delinquent)
+
+Esta variable cualitativa podría adoptar los siguientes valores: “Nunca” (Never), “Hace más de 2 años” (More than 2 years ago) y “En los últimos 2 años” (In the past 2 years). Estos valores se utilizan para indicar si el prestatario presenta un historial de pagos atrasados.
+
+### Cuentas de crédito (credit_accounts)
+
+Esta variable cualitativa representa diferentes niveles de cantidad de cuentas de crédito, como: “Pocas” (Few) , “Promedio” (Average) , “Muchas” (Many). 
+
+### Antecedentes públicos negativos (bad_public_record)
+
+Esta variable cualitativa puede adoptar los valores "Sí" (Yes) o "No" (No) con el propósito de señalar si el prestatario posee registros públicos desfavorables en su historial crediticio.
+
+### Utilización de crédito (credit_utilization). 
+
+Esta variable cualitativa se segmenta en tres categorías: "Bajo" (Low), "Regular" (Average) y "Alto" (High), con el propósito de representar diversos niveles de utilización de crédito en relación a los límites disponibles.
+
+### Bancarrota previa (past_bankrupt)
+
+Esta variable cualitativa adquiere los valores "Sí" (Yes) o "No" (No), con el propósito de señalar si el prestatario ha experimentado previamente una bancarrota en su historial crediticio.
+
+# Análisis de Resultados
+
+## Análisis de Resultados del Objetivo N°1
+
+***Objetivo N°1***: Comparar la proporción de nivel de endeudamiento alto entre prestatarios propietarios e inquilinos.
+
+### Análisis Univariante
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(ggplot2)
+library(dplyr)
+
+datos <- read.csv("C:\\Users\\elsac\\Documents\\Estadistica\\Codigo proyecto\\loansdata.csv")
+
+# Filtrado y selección de datos para propietarios e inquilinos con nivel "HIGH"
+propietarios_alto_endeudamiento <- datos %>%
+  filter(home_ownership == "OWN" & debt_to_income == "HIGH") %>%
+  select(home_ownership, debt_to_income)
+  
+inquilinos_alto_endeudamiento <- datos %>%
+  filter(home_ownership == "RENT" & debt_to_income == "HIGH")%>%
+  select(home_ownership, debt_to_income)
+
+# Combinar los dataframes
+combined_data <- rbind(propietarios_alto_endeudamiento, inquilinos_alto_endeudamiento)
+kable(table(combined_data$home_ownership),caption= "Tabla de Frecuencias entre prestatarios propietarios e inquilinos con nivel de endeudamiento alto")
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+# Crear el gráfico de barras con ggplot2
+grafico <- ggplot(data = combined_data, aes(x = home_ownership, fill = home_ownership)) +
+  geom_bar(position = "dodge") +
+  labs(caption = "Figura 1. Comparación de Nivel de Endeudamiento Alto entre Propietarios e Inquilinos",
+       x = "Grupo", y = "Cantidad") +
+  scale_fill_manual(values = c("OWN" = "blue", "RENT" = "red")) +
+  theme_minimal() +
+  geom_text(aes(label = paste(round((..count..)/sum(..count..)*100, 2), "%")), 
+            stat = "count", position = position_dodge(width = 0.9), vjust = -0.5            )
+
+print(grafico)
+```
+
+***Resumen***: Al analizar el cuadro 2 y la figura 1, se evidencia que el número de prestatarios que son propietarios asciende a 802, representando el 13.1%. Por ende, el 86.9% restante corresponde a prestatarios que alquilan vivienda, totalizando 4966 individuos, es decir, aproximadamente 6 veces más que aquellos con propiedad propia. 
+
+
+### Análisis Descriptivo 
+
+El análisis se basa en el cuadro 2 y la figura 1, que proporcionan datos sobre la distribución de prestatarios en términos de propiedad de vivienda. Se ha identificado que un total de 802 prestatarios son propietarios de vivienda, lo que representa el 13.9% del total de prestatarios en el estudio. Esto indica que una minoría relativamente pequeña de prestatarios posee su propia vivienda.
+
+Por otro lado, la gran mayoría, equivalente al 86.1% restante, corresponde a prestatarios que alquilan vivienda. Este grupo está compuesto por 4966 individuos en total. Esto es aproximadamente 6 veces más que la cantidad de prestatarios propietarios. Esta diferencia en la proporción es significativa y sugiere que el alquiler es la forma de tenencia de vivienda más común entre los prestatarios en el estudio.
+
+En resumen, los resultados del análisis muestran una distribución desigual en términos de propiedad de vivienda entre los prestatarios. Un pequeño porcentaje posee su propia vivienda, mientras que la mayoría opta por alquilar. Esto podría reflejar diferentes preferencias y situaciones económicas entre los prestatarios, así como la influencia de factores como el mercado inmobiliario y las condiciones crediticias.
+
+### Análisis Inferencial: Comparación de la proporción de nivel de endeudamiento alto entre propietarios e inquilinos
+
+Para realizar la comparación de proporciones, se empleara una prueba de hipotesis para proporciones, siendo:
+
+***H~0~: La proporción de inquilinos con  nivel de endeudamiento "Alto" es igual a la proporción de propietarios con nivel de endeudamiento "Alto": p1=p2***
+
+***H~a~: La proporción de inquilinos con  nivel de endeudamiento "Alto" no es igual a la proporción de propietarios con nivel de endeudamiento "Alto": $p1 \ne p2$***
+
+```{r,warning=FALSE, cache=FALSE, message=FALSE,echo=FALSE}
+library(ggplot2)
+library(dplyr)
+
+datos <- read.csv("C:\\Users\\elsac\\Documents\\Estadistica\\Codigo proyecto\\loansdata.csv")
+
+# Filtrado y selección de datos para propietarios e inquilinos con nivel "HIGH"
+propietarios_alto_endeudamiento <- datos %>%
+  filter(home_ownership == "OWN" & debt_to_income == "HIGH")
+
+inquilinos_alto_endeudamiento <- datos %>%
+  filter(home_ownership == "RENT" & debt_to_income == "HIGH")
+
+# Hipótesis Nula (H0): La proporción de inquilinos con nivel de endeudamiento "ALTO" es igual a la proporción de propietarios con nivel de endeudamiento "ALTO".
+# Hipótesis Alternativa (HA): La proporción de inquilinos con nivel de endeudamiento "ALTO" es diferente de la proporción de propietarios con nivel de endeudamiento "ALTO".
+
+# Calcular el total de inquilinos y propietarios con nivel "ALTO"
+total_inquilinos_propietarios <- nrow(inquilinos_alto_endeudamiento) + nrow(propietarios_alto_endeudamiento)
+
+# Calcular las proporciones de inquilinos y propietarios con nivel "ALTO"
+prop_inquilinos <- nrow(inquilinos_alto_endeudamiento) / total_inquilinos_propietarios
+prop_propietarios <- nrow(propietarios_alto_endeudamiento) / total_inquilinos_propietarios
+
+# Realizar la prueba de proporciones
+prop_test_result <- prop.test(c(nrow(inquilinos_alto_endeudamiento), nrow(propietarios_alto_endeudamiento)),
+                              c(total_inquilinos_propietarios, total_inquilinos_propietarios),
+                              alternative = "two.sided")
+
+# Imprimir el resultado de la prueba
+print(prop_test_result)
+```
+
+Usando prop.test, el valor de p hallado en la prueba fue igual a 2.2e-16. En teoría, si este valor es menor a 0.05 se rechaza la hipótesis nula. Por lo tanto, se rechaza que la proporción de inquilinos con nivel de endeudamiento "ALTO" es igual a la proporción de propietarios con nivel de endeudamiento "ALTO".
+
+
+### Conclusiones
+
+- ***Conclusión 1:*** Un 13.9% de los prestatarios son propietarios, mientras que un 86.1% son inquilinos. Esta discrepancia sugiere que la mayoría de los clientes del banco opta por el alquiler como forma de vivienda.
+
+- ***Conclusión 2:*** Los resultados resaltan la tendencia predominante de los clientes del banco hacia el alquiler en lugar de la propiedad de vivienda. Con una proporción significativamente mayor de inquilinos en comparación con propietarios, el banco podría considerar adaptar sus servicios y ofertas para atender a las necesidades específicas de ambos grupos.
+
+- ***Conclusión 3:*** El análisis de proporciones entre inquilinos y propietarios revela una diferencia estadísticamente significativa en los niveles de endeudamiento "ALTO". Esto implica que los prestatarios inquilinos y propietarios no presentan las mismas proporciones de endeudamiento "ALTO", lo que podría tener implicaciones en la gestión de riesgos crediticios por parte del banco.
+
+\pagebreak  
+
+## Análisis de Resultados del Objetivo N°2
+
+***Objetivo N°2***: Comparar la proporción del nivel alto de puntuaciones de crédito entre aquellos prestatarios que se han declarado en quiebra y los que no.
+
+### Análisis univariante
+
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+# Crear el gráfico de barras con ggplot2
+#Grafico 2.1
+
+library(ggplot2)
+library(dplyr)
+datosbanco <- read.csv("C:\\Users\\elsac\\Documents\\Estadistica\\Codigo proyecto\\loansdata.csv")
+septidato <- datosbanco %>%
+  select(credit_score) %>%
+  pull()
+tablasepti <- table(septidato)
+total_observaciones7 <- length(septidato)
+porcentajes7 <- (tablasepti / total_observaciones7) * 100
+grafico7 <- ggplot(as.data.frame(porcentajes7), aes(x = septidato, y = Freq)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  geom_text(aes(label = round(Freq, 2)), vjust = -0.5, color = "black") +  # Agrega los números como etiquetas
+  labs(title = "Diagrama de Barras sobre el nivel de puntaje crediticio", caption= "Figura 2. Diagrama de Barras sobre el nivel de puntaje crediticio.",
+       x = "Puntaje crediticio ",
+       y = "Porcentaje que representan") 
+print(grafico7)  
+```
+
+***Resumen***: En cuanto a la variable “credit_score”,  nos damos cuenta que la gran masa de los usuarios tiene un puntaje crediticio medio siendo el 68.2% del total de los usuarios, seguidos por aquellos que tienen un alto puntaje creditico siendo el 19.96% y la minoría conformada por aquellos con un bajo puntaje crediticio que son el 11.84% 
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+# Crear el gráfico de barras con ggplot2
+#Grafico 2.2
+
+library(ggplot2)
+library(dplyr)
+datosbanco <- read.csv("C:\\Users\\elsac\\Documents\\Estadistica\\Codigo proyecto\\loansdata.csv")
+trecedato <- datosbanco %>%
+  select(past_bankrupt) %>%
+  pull()
+tablatrece <- table(trecedato)
+total_observaciones13 <- length(trecedato)
+porcentajes13 <- (tablatrece / total_observaciones13) * 100
+grafico13 <- ggplot(as.data.frame(porcentajes13), aes(x = trecedato, y = Freq)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  geom_text(aes(label = round(Freq, 2)), vjust = -0.5, color = "black") +  # Agrega los números como etiquetas
+  labs(title = "Diagrama de Barras sobre si los clientes han estado en bancarrota", caption= "Figura 3. Diagrama de Barras sobre si los clientes han estado en bancarrota", 
+       x = "Pasado en bancarrota ",
+       y = "Porcentaje que representan") 
+print(grafico13) 
+```
+
+***Resumen***: En cuanto a la variable “past_bankrupt”, se tiene que el 96.22% de los clientes nunca se han declarado  en quiebra, mientras que el 3.78% restante si lo ha hecho , lo que nos da una idea de lo raro que son los usuarios que han estado en quiebra
+
+### Análisis Descriptivo 
+
+En cuanto a la variable “credit_score”,  nos damos cuenta que la gran masa de los usuarios tiene un puntaje crediticio medio siendo el 68.2% del total de los usuarios, seguidos por aquellos que tienen un alto puntaje creditico siendo el 19.96% y la minoría conformada por aquellos con un bajo puntaje crediticio que son el 11.84%
+En cuanto a la variable “past_bankrupt”, se tiene que el 96.22% de los clientes nunca se han declarado  en quiebra, mientras que el 3.78% restante si lo ha hecho , lo que nos da una idea de lo raro que son los usuarios que han estado en quiebra
+Dentro de los usuarios con “credit_score=HIGH” o usuarios con un puntaje crediticio alto:
+
+```{r,warning=FALSE, cache=FALSE, message=FALSE,echo=FALSE}
+library(ggplot2)
+library(dplyr)
+
+datosbanco <- read.csv("C:\\Users\\elsac\\Documents\\Estadistica\\Codigo proyecto\\loansdata.csv")
+
+# Filtrado y selección de datos para personas con un puntaje crediticio de nivel "HIGH"
+altoingreso <- datosbanco %>%
+  filter(credit_score == "HIGH") %>%
+  select(credit_score,past_bankrupt)
+
+kable(table(altoingreso), caption= "Tabla de Frecuencia entre prestatarios de puntaje crediticio alto que han estado en quiebra y aquellos que no ")
+```
+
+Revisando la tabla se puede afirmar que, para la muestra actual de declardos en quiebra con un puntaje crediticio alto, existe una mayor cantidad de quienes no lo hicieron, siendo estos el 99.96% de un total de 7931 personas
+
+### Análisis Inferencial: Comparación de la proporción de personas con un puntaje crediticio alto que se han declarado en quiebra.
+
+
+Para realizar la comparación de proporciones, se empleara una prueba de hipotesis para proporciones, siendo:
+
+***H~0~: La proporción de personas con un puntaje crediticio "ALTO" que se han declarado en quiebra es igual a la proporción de personas con un puntaje crediticio "ALTO" que no se han declarado en quiebra: p1=p2***
+
+***H~a~: La proporción de personas con un puntaje crediticio "ALTO" que se han declarado en quiebra es diferente de la proporción de personas con un puntaje crediticio "ALTO" que no se han declarado en quiebra "Alto": $p1 \ne p2$***
+
+
+```{r,warning=FALSE, cache=FALSE, message=FALSE,echo=FALSE}
+
+# Se crea una tabla con los usuarios con un puntaje crditicio "ALTO"
+tablatotal=table(altoingreso$credit_score, altoingreso$past_bankrupt)
+
+# Realizar la prueba de proporciones
+prop_test_result <- prop.test(tablatotal,alternative="greater",conf.level=0.95)
+# Imprimir el resultado de la prueba
+print(prop_test_result)
+```
+
+Usando prop.test, el valor de p hallado en la prueba fue igual a 2.2e-16. En teoría, si este valor es menor a 0.05 se rechaza la hipótesis nula. Por lo tanto, se rechaza que la proporción de personas con un puntaje crediticio "ALTO" que se han declarado en quiebra es igual a la proporción de personas con un puntaje crediticio "ALTO" que no se han declarado en quiebra".
+
+### Conclusiones
+
+- ***Conclusión 1:*** Es muy raro que prestatarios que poseen un alto puntaje crediticio se declaren en quiebra, aun así, estar dentro de esta categoría por increíblemente bajo que sea su porcentaje dentro de la misma no exenta al prestatarios de esa posibilidad, aunque los casos son practicamente datos aberrantes.
+
+- ***Conclusión 2:*** Es seguro para la institución financiera ofrecer créditos, ofertas de productos o cualquier otro servicio de este tipo, a prestatarios con un puntaje crediticio alto ya que el porcentaje de estos que quiebran es extremadamente bajo, lo cual prácticamente asegura que la institución financiera recuperara el monto prestado más el interés que le con el que se lo hizo.
+
+- ***Conclusión 3:*** Se recomienda potenciar la relacion con este tipo de usuarios ya que puede llevar a la generación de referencias de calidad que pueden aumentar la base de clientes ademas de que tener una base de prestatarios con historiales crediticios sólidos puede mejorar la imagen de una entidad financiera en el mercado lo cual aumenta la confianza de los inversores, reguladores y otros interesados en la institución.
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(dplyr)
+library(ggplot2)
+loans <- read.csv("C:\\Users\\elsac\\Documents\\Estadistica\\Codigo proyecto\\loansdata.csv")
+datos = loans
+
+data_filtrada = filter(datos, datos$loan_amount == "HIGH")
+data_filtrada = data.frame(data_filtrada)
+
+```
+
+## Análisis de Resultados del Objetivo N°3
+
+***Objetivo N°3***: Contrastar la proporción del monto de préstamo de nivel alto entre los prestatarios que registran un record público negativo y aquellos que no.
+
+
+### Analisis Univariante
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+fa_tabla_PR = table(data_filtrada$bad_public_record)
+
+fr_tabla_PR = prop.table(fa_tabla_PR) 
+
+fq = data.frame(fa_tabla_PR, fr_tabla_PR)
+names(fq) <- c("Record Publico", "Frecuencia Absoluta","Record Publico", "Frecunecia relativa")
+fq = select(fq, "Record Publico","Frecuencia Absoluta","Frecunecia relativa")
+fq
+```
+***Interpretacion***:Con respecto a la tabla de los Record publicos registrados, 
+el 96,2% de los prestatarios no cuentan con un mal registro, pero el 3,8% de los 
+prestatarios tiene un registro negativo acorde al nivel del monto del prestamo 
+del que se tiene registro.
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+
+barplot(fa_tabla_PR, xlab = "Record Publico", ylab = "Frecuencia", axis.lty = 1,xlim = c(0,2) ,ylim = c(0, 12000),
+        main = "Diagrama de barras: Registro publico nivel alto de credito", col = c("green", "red"), 
+        cex.axis = 1, cex.lab = 1, cex.names = 1, cex.main = 0.8, 
+        space = 0.2)
+
+porcentaje = data_filtrada %>% 
+  group_by(bad_public_record) %>% 
+  count() %>% 
+  ungroup() %>% 
+  mutate(percentage=`n`/sum(`n`)*100) 
+
+ggplot(porcentaje, aes(x=1, y=percentage, fill=bad_public_record)) +
+  geom_bar(stat="identity") +
+  geom_text(aes(label = paste0(round(percentage,1),"%")), 
+            position = position_stack(vjust = 0.5)) +
+  coord_polar(theta = "y") + 
+  theme_void() + scale_fill_manual(values = c("turquoise3","cornflowerblue"))+
+  ggtitle("Porcentajes de los Record Publicos registrados con nivel alto de credito")
+
+```
+***Interpretacion***:Visualizando los graficos, se puede afirmar que, para la
+muestra actual de Registro publico, existe una mayor cantidad de prestatarios 
+con creditos altos que no cuentan con un mal registro, en relacion con el total 
+de 11138 prestatarios
+
+### Análisis Descriptivo
+A partir de los graficos observados anteriormente es posible deducir que los 
+prestatarios que no cuantan con un registro publico negativo tienen una mayor
+proporcion en comparacion con los que cuentan con alguno.
+
+Un registro público negativo se refiere a un registro oficial o legal que 
+documenta información desfavorable o adversa sobre una persona, entidad o 
+propiedad. En finanzas un registro publico negativo es la declaracion de Bancarrota.
+
+Por lo tanto se analizara tambien variables que influyen en esta proporcion, ya 
+que la base de datos al estar constituida en su totalidad por variables cualitativas
+no es posible realizar un estudio de medidas de dispersion.
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+tabla_BR = table(data_filtrada$bad_public_record, data_filtrada$past_bankrupt)
+tabla_FBR = prop.table(tabla_BR)
+fq1 = data.frame(tabla_BR, tabla_FBR)
+names(fq1) = c("Record Publico","Bancarrota", "Frecuencia Absoluta","Record Publico2","Bancarrota1", "Frecunecia relativa")
+fq1 = select(fq1, "Record Publico","Bancarrota", "Frecuencia Absoluta","Frecunecia relativa")
+fq1
+```
+Revisando la tabla se observa que los prestatarios que no tienen un registro
+publico negativo ni se han declaro en bancarrota es el 96.2% de la muestra, sin
+embargo hay un 0.8% de personas que si tienen un record publico negativo pero 
+que no se han declarado en bancarrota por lo que se consideraria un valor atipico
+
+Otra de las variables que podrian influir significativamente en la proporcion de
+los datos es el nivel de ingreso y la puntuacion de credito ya que son factores 
+importantes al momento de evaluar a una persona si esta calificada o esta sujeto
+a una solicitud de prestamo.
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+data_YPR = filter(data_filtrada, data_filtrada$bad_public_record == "YES")
+data_NPR = filter(data_filtrada, data_filtrada$bad_public_record == "NO")
+
+tabla_NPR = table(data_NPR$income)
+barplot(tabla_NPR, xlab = "Ingreso", ylab = "Frecuencia", axis.lty = 1, ylim = c(0, 6000),
+        main = "Diagrama de barras: NO Registro Publico", col = c("blue", "red","cornflowerblue"), 
+        cex.axis = 1.4, cex.lab = 1, cex.names = 1.5, cex.main = 1.5, 
+        space = 0.5)
+
+tabla_YPR = table(data_YPR$income)
+barplot(tabla_YPR, xlab = "Ingreso", ylab = "Frecuencia", axis.lty = 1, ylim = c(0, 250),
+        main = "Diagrama de barras: SI Registro Publico", col = c("blue", "red","cornflowerblue"), 
+        cex.axis = 1.4, cex.lab = 1, cex.names = 1.5, cex.main = 1.5, 
+        space = 0.5)
+
+```
+***Interpretacion***:Como se logra distinguir, los niveles mas destacados entre 
+ambas muestras son HIGH y MEDIUM dando la informacion de que los prestatarios 
+tienen el nivel de ingreso suficiente para ser sujetos de credito.
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+tabla_NPR2 = table(data_NPR$credit_score)
+barplot(tabla_NPR2, xlab = "Puntuacion de Credito", ylab = "Frecuencia", axis.lty = 1, ylim = c(0, 8000),
+        main = "Diagrama de barras: NO Record Publico", col = c("blue", "red","cornflowerblue"), 
+        cex.axis = 1.4, cex.lab = 1, cex.names = 1.5, cex.main = 1.5, 
+        space = 0.5)
+
+tabla_YPR2 = table(data_YPR$credit_score)
+barplot(tabla_YPR2, xlab = "Puntuacion de Credito", ylab = "Frecuencia", axis.lty = 1, ylim = c(0, 400),
+        main = "Diagrama de barras: SI Registro Publico", col = c("blue", "red","cornflowerblue"), 
+        cex.axis = 1.4, cex.lab = 1, cex.names = 1.5, cex.main = 1.5, 
+        space = 0.5)
+```
+***Interpretacion***:Podemos notar que el nivel "Average" es el mas alto en 
+ambas graficas, de los prestatarios que NO tienen un registro publico el 69,4% 
+de los 10713 tienen un puntaje de credito promedio, mientras los que SI el 85% 
+de los 425 cuentan con el mismo nivel.
+
+Con estos datos se puede destacar que aunque los prestatarios tenga un registro
+publico negativo no quiere decir que los ingresos o la puntuacion de credito sea
+bajo, las graficas muestran que que se mantinen entre los niveles altos y medios
+los cuales influyen en la proporcion final que se desea obtener entre el nivel 
+credito y los registro negativos.
+
+### Análisis Inferencial: Contrastar la proporción del monto de préstamo de nivel alto entre los prestatarios que registran un record público negativo y aquellos que no.
+
+***Verificacion de independencia***
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+# Hipótesis Nula (H0): Las variables son Independientes.
+# Hipótesis Alternativa (HA): Las variables son Dependientes.
+chisq.test(fa_tabla_PR)
+```
+***Interpretacion***: Se puede observar que mediante la prueba chi cuadrado
+el valor p es mucho menor a 0.05 se puede decir que existe evidencia suficiente
+para que las variables sean dependientes una de la otra.
+```{r}
+
+td = table(datos$bad_public_record,datos$loan_amount)
+mosaicplot(td, main = "Grafico Mosaico: Registro Publico", color = 2:6, xlab = "Registro Publico", ylab = "Nivel de credito")
+```
+***Interpretacion***: En la ilustracion de mosaico, los rectangulos representan
+la proporcion de las variables, se observa que los prestatarios que no tienen 
+un registro publico negativo tienen un mayor porcentaje y proporcion contrastando
+con los que si tienen un registro publico negativo.
+
+```{r}
+# Hipótesis Nula (H0): La proporción de Registro publicos negativos con nivel de credito "ALTO" es igual a la proporción de Registros publicos no negativos con nivel de credito "ALTO".
+
+# Hipótesis Alternativa (HA): La proporción de Registro publicos negativos con nivel de credito "ALTO" es diferente a la proporción de Registros publicos no negativos con nivel de credito "ALTO".
+total_PR <- nrow(data_YPR) + nrow(data_NPR)
+
+prop_NPR <- nrow(data_NPR) / total_PR
+prop_YPR <- nrow(data_YPR) / total_PR
+
+
+prop.test(c(nrow(data_NPR), nrow(data_YPR)),
+                              c(total_PR, total_PR),
+                              alternative = "two.sided")
+```
+
+### Conclusiones
+
+- ***Conclusión 1:*** Se concluye que existe dependencia entre las variables y factores que pueden afectar la proporción, es decir, los ingresos y la puntuación de crédito mientras sean altas un prestatario con registro publico negativo puede ser sujeto a un nivel de préstamo alto 
+
+- ***Conclusión 2:***  Se contrastó la proporción entre los registro de los prestatarios y el nivel de préstamo, debido a que el porcentaje destacado mayor recae sobre aquellos que no cuentan con un registro, mientras que el porcentaje más bajo hace referencia a los que si.
+
+- ***Conclusión 3:*** En base a la información mostrada de los prestatarios, se infiere que tener un registro publico negativo no es una condición suficiente para no solicitar un nivel de préstamo alto
+
+\pagebreak
+# Referencias
+
+Bibliografía
+
+FERNÁNDEZ, J. A. (10 de Enero de 2022). elpais. Obtenido de https://elpais.com/economia/estar-donde-estes/2022-01-10/lo-que-el-banco-analiza-antes-de-conceder-una-hipoteca-a-un-cliente.html
+
+
+Villar, A. (7 de Octubre de 2014). clearpoint. Obtenido de https://www.clearpoint.org/es/blog/factores-que-influyen-en-su-credito/
+
+\pagebreak
+# Anexos 
+
+https://github.com/SebastianChiriboga1/Proyecto-Estadistica.git
+
+Enlace de Repositorio github donde se encuentra el codigo, informe y presentacion del proyecto
+
+
+
+```{r echo= TRUE}
